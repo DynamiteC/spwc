@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_self">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="OSTEOGEST || Paolo Artasensi">
+    <!-- Materialize-->
+    <?!= HtmlService.createHtmlOutputFromFile('admin-materialize.min.css').getContent() ?>
+    <!-- Material Icons-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.0.0/cropper.min.css" />
+</head>
+<style>
+    .modal {
+        width: 100%;
+        height: 100%;
+        min-height: 100% !important;
+        margin: 0;
+        padding: 0;
+        top: 0% !important;
+    }
+
+    .modal-content {
+        min-height: 100%;
+        border-radius: 0;
+    }
+</style>
+
+<body>
+    <div class="card row center-align">
+        <video id="video" style="width:100vw;height:100vh;" autoplay></video>
+    </div>
+    <div id="imageView" class="card row center-align">
+      <div class="row">
+        <img id="showImage">
+      </div>
+      <div class="row">
+        
+      </div>
+    </div>
+    <div id="canvasModal" class="modal">
+        <div class="modal-content" style="overflow-y:scroll;">
+            <div class="row" style="margin-bottom:5px;">
+                <a href="#!" id="makeVideoLive" class="modal-close waves-effect waves-green btn-flat right">Close</a>
+            </div>
+            <div class="row center-align">
+                <canvas id="canvas"></canvas>
+            </div>
+            <div class="row">
+            
+            </div>
+            <div class="row center-align">
+              <div class="row">
+                <button type="button" id="zoomIn" class="btn btn-primary" data-method="zoom" data-option="0.1" title="Zoom In">
+                    <i class="material-icons">zoom_in</i>
+                </button>
+                <button type="button" id="zoomOut" class="btn btn-primary" data-method="zoom" data-option="-0.1" title="Zoom Out">
+                    <i class="material-icons">zoom_out</i>
+                </button>
+                    
+                <button type="button" id="moveLeft" class="btn btn-primary" data-method="move" data-option="-10"
+                    data-second-option="0" title="Move Left">
+                    <i class="material-icons">arrow_back</i>
+                </button>
+                <button type="button" id="moveRight" class="btn btn-primary" data-method="move" data-option="10" data-second-option="0"
+                    title="Move Right">
+                        <i class="material-icons">arrow_forward</i>
+                </button>
+                <button type="button" id="moveUp" class="btn btn-primary" data-method="move" data-option="0"
+                    data-second-option="-10" title="Move Up">
+                    <i class="material-icons">arrow_upward</i>
+                </button>
+                <button type="button" id="moveDown" class="btn btn-primary" data-method="move" data-option="0" data-second-option="10"
+                    title="Move Down">
+                    <i class="material-icons">arrow_downward</i>
+                </button>
+               </div>
+               <div class="row">
+                <button type="button" id="rotateLeft" class="btn btn-primary" data-method="rotate" data-option="90"
+                    title="Rotate Left">
+                    <i class="material-icons">rotate_left</i>
+                </button>
+                <button type="button" id="rotateRight" class="btn btn-primary" data-method="rotate" data-option="90"
+                    title="Rotate Right">
+                    <i class="material-icons">rotate_right</i>
+                </button>
+
+                <button type="button" id="swapHoriz" class="btn btn-primary" data-method="scaleX" data-option="-1"
+                    title="Flip Horizontal">
+                    <i class="material-icons">swap_horiz</i>
+                </button>
+                <button type="button" id="swapVert" class="btn btn-primary" data-method="scaleY" data-option="-1"
+                    title="Flip Vertical">
+                    <i class="material-icons">swap_vert</i>
+                </button>
+
+                <button type="button" id="saveImage" class="btn btn-primary" data-method="crop" title="Crop">
+                    <i class="material-icons">check</i>
+                </button>
+                
+                <button type="button" id="refreshImage" class="btn btn-primary" data-method="reset" title="Reset">
+                    <i class="material-icons">refresh</i>
+                </button>
+               </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Materialize -->
+    <?!= HtmlService.createHtmlOutputFromFile('materialize.min.js').getContent() ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.0.0/cropper.min.js"></script>
+    <script>
+        //declare ideal values
+        var constraints = {
+            audio: false,
+            video: {
+                facingMode: "environment"
+            }
+        };
+
+        $(document).ready(function () {
+            var video = document.getElementById('video');
+            // Get access to the camera!
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+                    video.srcObject = stream;
+                    video.play();
+                });
+            }
+        });
+
+        document.getElementById("video").addEventListener("click", function () {
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var video = document.getElementById('video');
+            $('#canvas').prop('width', video.videoWidth);
+            $('#canvas').prop('height', video.videoHeight);
+            var instance = M.Modal.getInstance($('#canvasModal'))
+            instance.open();
+            context.scale(1, 1);
+            context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+            if($('#canvas').data('cropper'))
+            {
+              $('#canvas').data('cropper').destroy();
+              $('#canvas').data('cropper',null);
+            }
+            var image = $('#canvas');
+            image.cropper({
+                dragMode: "none",
+                crop: function (event) {
+                    console.log(event.detail.x);
+                    console.log(event.detail.y);
+                    console.log(event.detail.width);
+                    console.log(event.detail.height);
+                    console.log(event.detail.rotate);
+                    console.log(event.detail.scaleX);
+                    console.log(event.detail.scaleY);
+                },
+                data: {
+                  width: 134,
+                  height: 333
+                },
+                cropBoxResizable: false
+            });
+            video.pause();
+            $(video)[0].srcObject.getTracks()[0].stop();
+        });
+
+        $(document).ready(function () {
+            $('#canvasModal').modal({ onCloseEnd: onModalClose });
+            $('#zoomIn').click(function () {
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.zoom(0.1);
+            });
+            $('#zoomOut').click(function () {
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.zoom(-0.1);
+            });
+            $('#moveLeft').click(function () {
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.move(-10,0)
+            });
+            $('#moveRight').click(function () {
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.move(10,0)
+            });
+            $('#moveUp').click(function () {
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.move(0,-10)
+            });
+            $('#moveDown').click(function () {
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.move(0,10)
+            });
+            $('#rotateLeft').click(function () {
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.rotate(-90)
+            });
+            $('#rotateRight').click(function () {
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.rotate(90)
+            });
+            $('#swapHoriz').click(function () {
+                var scale = $('#swapHoriz').data('option')
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.scaleX(scale);
+                $('#swapHoriz').data('option',-scale)
+            });
+            $('#swapVert').click(function () {
+                var scale = $('#swapVert').data('option')
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                cropper.scaleY(scale);
+                $('#swapVert').data('option',-scale)
+            });
+            $('#saveImage').click(function () {
+                var image = $('#canvas');
+                var cropper = image.data('cropper');
+                var imgurl = cropper.getCroppedCanvas().toDataURL();
+                document.getElementById('showImage').src = imgurl;
+                var instance = M.Modal.getInstance($('#canvasModal'))
+                instance.close();
+                 $('html, body').animate({
+                      scrollTop: $("#showImage").offset().top
+                 }, 2000);
+            });
+            $('#refreshImage').click(function () {
+                if($('#canvas').data('cropper'))
+                {
+                  $('#canvas').data('cropper').destroy();
+                  $('#canvas').data('cropper',null);
+                }
+                var image = $('#canvas');
+                image.cropper({
+                    dragMode: "none",
+                    crop: function (event) {
+                        console.log(event.detail.x);
+                        console.log(event.detail.y);
+                        console.log(event.detail.width);
+                        console.log(event.detail.height);
+                        console.log(event.detail.rotate);
+                        console.log(event.detail.scaleX);
+                        console.log(event.detail.scaleY);
+                    },
+                    data: {
+                      width: 134,
+                      height: 333
+                    },
+                    cropBoxResizable: false
+                });
+            });
+        });
+
+        var onModalClose = function () {
+            var video = document.getElementById('video');
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+                    video.srcObject = stream;
+                    video.play();
+                });
+            }
+        };
+
+
+        
+
+
+        //        document.getElementById("rotateright").addEventListener("click", function () {
+//            rotate = rotate - 90;
+//        
+//        }, false);
+//        
+//        document.getElementById("rotateleft").addEventListener("click", function () {
+//          rotate = rotate + 90;
+//          updateCanvas();
+//          
+//        }, false);
+//        
+//        function updateCanvas() {
+//          context.setTransform(1, 0, 0, 1, 0, 0);
+//          context.clearRect(0, 0, canvas.width, canvas.height);
+//          context.translate(canvas.width * 0.5, canvas.height * 0.5);
+//          context.rotate(rotate * Math.PI / 180);
+//          context.scale(0.5,0.5);
+//          context.translate(-canvas.width * 0.5, -canvas.height * 0.5);
+//          context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+//        }
+    </script>
+</body>
+
+</html>
