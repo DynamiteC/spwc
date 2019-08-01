@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="msapplication-tap-highlight" content="no">
-    <meta name="description" content="OSTEOGEST || Paolo Artasensi">
+    <meta name="description" content="Webcam || github.com/DynamiteC">
     <!-- Materialize-->
-    <?!= HtmlService.createHtmlOutputFromFile('admin-materialize.min.css').getContent() ?>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!-- Material Icons-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.0.0/cropper.min.css" />
@@ -111,7 +111,7 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <!-- Materialize -->
-    <?!= HtmlService.createHtmlOutputFromFile('materialize.min.js').getContent() ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.0.0/cropper.min.js"></script>
     <script>
         //declare ideal values
@@ -273,31 +273,6 @@
                 });
             }
         };
-
-
-        
-
-
-        //        document.getElementById("rotateright").addEventListener("click", function () {
-//            rotate = rotate - 90;
-//        
-//        }, false);
-//        
-//        document.getElementById("rotateleft").addEventListener("click", function () {
-//          rotate = rotate + 90;
-//          updateCanvas();
-//          
-//        }, false);
-//        
-//        function updateCanvas() {
-//          context.setTransform(1, 0, 0, 1, 0, 0);
-//          context.clearRect(0, 0, canvas.width, canvas.height);
-//          context.translate(canvas.width * 0.5, canvas.height * 0.5);
-//          context.rotate(rotate * Math.PI / 180);
-//          context.scale(0.5,0.5);
-//          context.translate(-canvas.width * 0.5, -canvas.height * 0.5);
-//          context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-//        }
     </script>
 </body>
 
